@@ -1,0 +1,90 @@
+<html>
+    <head>
+        <title>Chat Room Domo</title>
+    </head>
+    <body>
+       <ul class="char-box" id="chat_box">
+       </ul>
+       <div class="form-box">
+                      <input type="text" id="text">
+               <button type="submit" id="send_btn">发送</button>
+       </div>
+    </body>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- <script src="http://code.jquery.com/jquery-1.11.1.js"></script> -->
+    <script>
+
+        !(function util(){
+            String.prototype.trim = function() {
+                return this.replace(/(^\s+)|(\s+$)/g, "");
+            }
+
+            function ajax(options) {
+                var opts = {
+                    type: options.type || "GET",
+                    url: options.url,
+                    data : options.data
+                };
+
+                if(!opts.url) {
+                    return false;
+                }
+
+                function stringify(data) {
+                    var params = "",
+                        i;
+                        
+                    for(var key in data) {
+                        var value = data[key];
+                        if(typeof value === "object") {
+                            if(value instanceof Array){
+                                for( i= 0,len = value.length; i < len ; i++) {
+                                    params += key + "=" + value[i];
+                                }
+                            }else{
+                                params += key + "=" + stringify(data[key]);
+                            }
+                        }
+                        
+                    }
+                    return params;
+                }
+                   
+
+                var xhr = XMLHttpRequest(opts.type, opts.url + params);
+                xhr.onreadystatechange
+            }
+
+        }); 
+
+        var socket = io();
+
+        // 发送消息
+        var sendBtn = document.getElementById("send_btn");
+        sendBtn.onclick = function(e){
+            var msg = document.getElementById("text").value;
+
+            if(!msg.trim()){
+                return false;
+            }
+
+            socket.emit("chat message", msg);
+            return false;
+        }
+
+        var msgList = document.getElementById("chat_box");
+        socket.on("chat message",function(msg) {
+            var dMsg = document.createElement("li");
+            var tMsg = "<p>username&emsp;&emsp;2015-10-11 18:12</p>"+
+                        "<p>"+ msg +"</p>";
+            dMsg.className = "message";
+            dMsg.innerHTML = tMsg;
+            msgList.appendChild(dMsg);
+        });
+
+        // 离开聊天室
+        window.onbeforeunload = function() {
+
+        }
+    </script>
+</html>
